@@ -1,0 +1,31 @@
+! peer 1 WAN is 203.0.113.1
+! peer 2 WAN is 203.0.113.5
+! tunnel network is 198.51.0.0/30
+!
+!       |198.51.0.1                                     198.51.0.2 |                        
+!       |-----------------------------------------------------------                        
+!       |                 GRE/IPSEC 198.51.0.0/30                  |                        
+!                                                                                           
+!                                                                                           
+! +------+  203.0.113.1/30        +------+  203.0.113.6/30        +------+                  
+! |      |  G1/0                  |      |  G2/0                  |      |                  
+! |  R1  --------------------------  R2  --------------------------  R3  |                  
+! |      |                  G1/0  |      |                  G1/0  |      |                  
+! +------+        203.0.113.2/30  +------+        203.0.113.5/30  +------+ 
+
+!R1 config
+interface Tunnel0
+ ip address 198.51.0.1 255.255.255.252
+
+ ! tweak gre tunnel
+ bandwidth 2000
+ ip mtu 1400
+ ip tcp adjust-mss 1360
+ !! sometimes cml borks so you need this
+ keepalive 10
+
+ !tunnel source 203.0.113.1
+ tunnel source GigabitEthernet0/1
+ tunnel destination 203.0.113.5
+
+ tunnel mode gre ipv4

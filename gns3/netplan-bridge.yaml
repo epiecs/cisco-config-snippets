@@ -1,0 +1,36 @@
+#! vpcs have the same mac and this cant be changed so dont use them
+#! for tests, use a router. Double check the base mac in the node
+
+#? in vsphere edit the portgroup
+#? Promiscuous mode accept
+#? MAC address changes accept
+#? Forged transmits accept
+
+#! add another interface to the node and make sure that it is of the
+#! type E1000. VMXNET3 may work sometimes.
+
+#! on gns3 edit the /etc/netplan/90_gns3vm_static_netcfg.yaml or use 
+#! the network editor from the main menu. Dont forget to use 
+#! `netplan apply` when you have not used the main menu (or just reboot)
+
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+
+# Uncomment the following lines if you want to manually configure your network
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses:
+        - 10.30.60.25/24
+      gateway4: 10.30.60.1
+      nameservers:
+          addresses: [10.30.50.254, 9.9.9.9]
+  bridges:
+    brwan:
+      dhcp4: yes
+      interfaces:
+        - eth1

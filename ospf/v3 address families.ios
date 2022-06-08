@@ -1,0 +1,41 @@
+router ospfv3 1
+router-id 1.1.2.3
+address-family ipv4 unicast
+!  default-information originate always
+!  area 2 range 10.2.0.0 255.255.0.0
+exit
+address-family ipv6 unicast
+!  default-information originate always
+!  area 2 range 2001:DB8:2::/48
+exit
+
+interface g0/1
+ ospfv3 1 ipv4 area 0
+ ospfv3 1 ipv6 area 0
+ ospfv3 1 network point-to-point
+
+
+!! nexus only supports ipv6 with AF
+!! you need to enable normal ospf 
+!! with the feature and then you can use normal ospf
+interface e1/1
+ipv6 router ospfv3 1 area 2
+
+int vlan 10
+ipv6 router ospfv3 1 area 2
+int vlan 20
+ipv6 router ospfv3 1 area 2
+exit
+
+feature ospf
+router ospf 1
+router-id 1.1.1.1
+default-information originate always
+exit
+interface e1/1
+ip router ospf 1 area 2
+int vlan 10
+ip router ospf 1 area 2
+int vlan 20
+ip router ospf 1 area 2
+exit

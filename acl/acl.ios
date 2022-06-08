@@ -1,0 +1,109 @@
+!
+! standard acl
+!
+ip access-list standard WEBSERVER_ACCESS
+remark Toegang tot web server
+permit 172.16.0.0 0.0.0.255
+permit 10.0.0.50 0.0.0.0
+
+!
+! extended acl
+!
+ip access-list extended WEBSERVER_ACCESS
+remark Toegang tot web server
+permit tcp 172.16.0.0 0.0.0.255 host 192.168.0.20 eq 80
+permit tcp 172.16.0.0 0.0.0.255 host 192.168.0.20 eq 443
+permit tcp host 10.0.0.50 host 192.168.0.20 eq 80
+permit tcp host 10.0.0.50 host 192.168.0.20 eq 443
+
+!
+! shortcuts
+!
+ip access-list standard FTP_ACCESS
+permit host 10.0.0.50
+ip access-list standard WEB_OUTBOUND
+permit any
+
+!
+! sequence numbers
+!
+ip access-list standard WEBSERVER_ACCESS
+remark Toegang tot web server
+10 permit 172.16.0.0 0.0.0.255
+15 permit host 10.0.0.50
+
+!
+! acl voor established traffic
+!
+ip access-list extended WEB_BROWSING
+remark allow 172.16.0.0 internet access
+permit udp 172.16.0.0 0.0.0.255 any eq 53
+permit tcp 172.16.0.0 0.0.0.255 any eq 80
+permit tcp 172.16.0.0 0.0.0.255 any eq 443
+! merk op dat het lan netwerk nu de destination is omdat we outbound op
+! g0/0 deze acl gaan toepassen
+ip access-list extended WEB_ESTABLISHED
+remark allow established connections back in
+permit tcp any 172.16.0.0 0.0.0.255 established
+int g0/0
+ip access-group WEB_BROWSING in
+ip access-group WEB_ESTABLISHED out
+
+!
+! acl voor management interfaces
+!
+ip access-list standard ALLOW_MANAGEMENT
+remark IPs met toegang tot management interfaces
+permit 10.0.0.0 0.0.0.255
+deny any
+exit
+! De ACL toepassen
+line vty 0 4
+access-class ALLOW_MANAGEMENT in
+
+!
+! reflexive acl
+!
+! Het netwerk 172.16.0.0/24 toegang geven tot het web en dns
+! We voegen ook een rule toe voor icmp
+ip access-list extended WEB_BROWSING
+remark allow 172.16.0.0 internet access
+permit udp 172.16.0.0 0.0.0.255 any eq 53 reflect DNS_IN
+permit tcp 172.16.0.0 0.0.0.255 any eq 80 reflect HTTP_IN
+permit tcp 172.16.0.0 0.0.0.255 any eq 443 reflect HTTPS_IN
+permit icmp 172.16.0.0 0.0.0.255 any reflect ICMP_IN
+int g0/0
+ip access-group WEB_BROWSING in
+
+Ip access-list extended ALLOW_REFLECT
+evaluate DNS_IN
+evaluate HTTP_IN
+evaluate HTTPS_IN
+evaluate ICMP_IN
+int g0/0
+ip access-group ALLOW_REFLECT out
+
+!
+! object groups
+!
+object-group network DNS_SERVERS
+host 9.9.9.9
+host 8.8.8.8
+! service object groups definiëren altijd de destination ports. Als je een
+! source port wenst te definiëren moet je tcp source 80 gebruiken
+object-group service WEB_PORTS
+tcp 80
+tcp 443
+
+ip access-list extended WEB_BROWSING
+permit object-group WEB_PORTS 172.16.0.0 0.0.0.255 any
+permit tcp 172.16.0.0 0.0.0.255 object-group DNS_SERVERS eq domain
+
+!
+! verify
+!
+
+show access-lists
+clear access-list counters <access-list>
+show run | section ip access-list
+show ip int <interface> | include access list

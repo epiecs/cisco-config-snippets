@@ -1,0 +1,12 @@
+interface vlan 10
+standby version 2
+
+!! ipv4
+standby 10 ip 10.2.10.1
+standby 10 preempt
+standby 10 priority 150
+
+!! ipv6
+standby 610 ipv6 autoconfig
+standby 610 preempt
+standby 610 priority 150

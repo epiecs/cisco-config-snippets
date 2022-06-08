@@ -1,0 +1,52 @@
+enable
+configure terminal
+! indien je gebruik maakt van een switch
+ip routing
+
+router ospf 1
+router-id 1.1.0.1
+auto-cost reference-bandwidth 100000
+passive-interface default
+default-information originate
+
+no passive-interface GigabitEthernet 0/0
+no passive-interface GigabitEthernet 0/1
+
+! Network toevoegen aan ospf
+network 10.0.0.0 0.0.0.15 area 0
+network 172.16.1.0 0.0.0.1 area 0
+
+! Default route
+ip route 0.0.0.0 0.0.0.0 g0/3 192.168.122.1
+
+interface g0/0
+ip address 10.0.0.0 255.255.255.254
+ip ospf network point-to-point
+no shutdown
+exit
+
+! Interface toevoegen aan ospf
+interface g0/0
+ip address 10.0.0.0 255.255.255.254
+ip ospf network point-to-point
+ip ospf <process id> area 0
+no shutdown
+exit
+
+interface loopback 0
+ip address 172.16.1.1 255.255.255.0
+ip ospf network point-to-point
+exit
+
+
+
+do wr mem
+
+!? TSHOOT
+show ip interface brief
+show ip route
+show ip protocols | include Router ID
+show ip ospf interface GigabitEthernet 0/0
+show ip ospf database
+show ip ospf neighbour
+debug ip ospf packet

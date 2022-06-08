@@ -1,0 +1,56 @@
+!! an issue with classic eigrp is that the configuration is dispersed
+!! all over the rest of the config. This is centralized in eigrp named 
+!! configuration
+
+!! ipv4 is configured under the router eigrp statement and ipv6 has to 
+!! be configged on the interface
+
+router eigrp 1              
+ network 10.0.0.0 0.0.0.255
+ passive-interface default
+ no passive-interface gi0/2
+ variance 2
+ exit
+
+interface GigabitEthernet0/1
+ ip address 10.0.0.1 255.255.255.0
+ ip hello-interval eigrp 1 2
+ ip hold-time eigrp 1 10
+
+! IPv6
+
+ipv6 router eigrp 2
+ variance 2
+
+int GigabitEthernet0/2
+ ipv6 address 2001:db8:2:100::1/64
+ ipv6 eigrp 2
+
+
+
+! int Gi0/0
+!  ip add 192.168.1.1 255.255.255.252
+!  ip authentication mode eigrp 100 md5
+!  ip authentication key-chain eigrp 100 ciscozine-key
+!  ip hello eigrp 100 12
+!  ipv6 address 2003::1/64
+!  ipv6 eigrp 200
+
+! router eigrp 100
+!  network 192.168.1.0 0.0.0.3
+!  passive-interface default
+!  no passive-interface Gi0/0
+!  distribute-list prefix Ciscozine-PREFIX in
+!  redistribute connected
+
+! ! EIGRP provides a mechanism to load balance over unequal cost paths throungh Variance Command. 
+! ! Variance is a number (1 to 128), multiplied by the local best metric then includes the routes 
+! ! with the lesser or equal metric. The default Variance value is 1, which means equal-cost 
+! ! load balancing.
+
+! ipv6 router eigrp 200
+!  variance 2 
+
+! router eigrp 300
+!  address-family ipv4 vrf Cisco-VRF
+!  network 0.0.0.0 0.0.0.0

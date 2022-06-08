@@ -1,0 +1,87 @@
+!
+! static nat
+!
+
+! Select inside and outside interfaces
+int g0/0
+ip nat outside
+int g0/1
+ip nat inside
+exit
+! 192.168.0.50 toelaten om 203.0.113.1 te gebruiken
+ip nat inside source static 192.168.0.50 203.0.113.1
+
+
+!
+! port forwarding
+!
+
+! Select inside and outside interfaces
+int g0/0
+ip nat outside
+int g0/1
+ip nat inside
+exit
+! 172.16.0.10:80 mappen op 203.0.113.10:8080
+ip nat inside source static tcp 172.16.0.10 80 203.0.113.10 8080
+
+!
+! dynamic nat
+!
+
+! Select inside and outside interfaces
+int g0/0
+ip nat outside
+int g0/1
+ip nat inside
+! een pool aanmaken van outside global adressen die gebruikt mogen worden
+ip nat pool WAN_IPS_WEBSERVERS 203.0.113.11 203.0.113.12 prefix-length 24
+! een acl aanmaken die bepaalt welke inside local adressen gebruik mogen
+! maken van de nat pool
+ip access-list standard WEBSERVERS
+permit host 172.16.0.11
+! in een NAT rule de webservers toelaten de pool te gebruiken
+ip nat inside source list WEBSERVERS pool WAN_IPS_WEBSERVERS
+
+!
+! PAT overload
+!
+
+! Select inside and outside interfaces
+int g0/0
+ip nat outside
+int g0/1
+ip nat inside
+! een acl aanmaken die bepaalt welke adressen mogen
+! gebruik maken van PAT
+ip access-list standard LAN_ALLOW_PAT
+permit 10.0.0.0 0.0.0.255
+! in een nat rule aangeven dat onze interne adressen mogen
+! gebruik maken van PAT. In dit geval maken we gebruik van
+! 1 enkele interface
+ip nat inside source list LAN_ALLOW_PAT interface g0/0 overload
+
+!
+! PAT op basis van een ip en niet een interface
+!
+
+! onze oude nat rule verwijderen
+no ip nat inside source list LAN_ALLOW_PAT interface g0/0 overload
+Gregory Bers CCNA 3 - ENSA - Chapter 6 8
+! even G0/0 enkele secundaire ip's geven
+int g0/0
+ip add 192.168.122.11 255.255.255.0 secondary
+ip add 192.168.122.12 255.255.255.0 secondary
+! een nat pool definieren
+ip nat pool WAN_IPS 192.168.122.10 192.168.122.12 prefix-length 24
+! een nat rule aanmaken die overloading toepast mbv onze pool
+ip nat inside source list LAN_ALLOW_PAT pool WAN_IPS overload
+
+
+!
+! Verify
+!
+show ip nat translations
+show ip nat statistics
+debug ip nat
+do show run | include nat

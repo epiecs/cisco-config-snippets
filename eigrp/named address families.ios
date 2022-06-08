@@ -1,0 +1,41 @@
+!! name is locally significant
+router eigrp EIGRP-NAMED
+
+address-family ipv4 unicast autonomous-system 1
+ af-interface default
+  hello-interval 2
+  hold-time 10
+  passive-interface
+  exit-af-interface
+
+address-family ipv6 unicast autonomous-system 2
+  exit-address-family
+
+ af-interface GigabitEthernet0/1
+  no passive-interface
+  exit-af-interface
+
+ topology base
+  variance 2
+  exit-af-topology
+
+ network 0.0.0.0
+  exit-address-family
+
+!? TSHOOT IPv4
+! Display details around the EIGRP protocol (includes K values)
+show ip protocols	
+! Display EIGRP neighbors
+show ip eigrp neighbors	
+! Display EIGRP interfaces
+show ip eigrp interfaces	
+show ip eigrp interfaces detail
+
+!? TSHOOT IPv6
+! Display details around the EIGRP protocol (includes K values)
+show ipv6 protocols	
+! Display EIGRP neighbors
+show ipv6 eigrp neighbors	
+! Display EIGRP interfaces
+show ipv6 eigrp interfaces	
+show ipv6 eigrp interfaces detail

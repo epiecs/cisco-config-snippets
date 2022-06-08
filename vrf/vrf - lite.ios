@@ -1,0 +1,21 @@
+vrf definition VRF_A
+ 
+ address-family ipv4
+ exit-address-family
+ 
+ address-family ipv6
+ exit-address-family
+
+interface Loopback0
+ vrf forwarding VRF_A
+ ip address 11.11.11.11 255.255.255.255
+ ipv6 address 2001:DB8:ACAD::11/128
+
+ 5. Create an ipv6 vrf on iosv-0 and iosv-3 by using "vrf definition VRF6 and address-family ipv6". 
+The remaining configuration is the same as in ipv4.  Configure new ipv6 loopback interfaces on 
+both routers.  You should be able to ping from one loopback to the other using the vrf (use static routing).
+
+
+int lo60
+vrf forwarding VRF6
+ipv6 address 2001:db8:2000::1/64

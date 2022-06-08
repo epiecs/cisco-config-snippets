@@ -1,0 +1,8 @@
+ip dhcp excluded-address 10.2.10.1
+ip dhcp excluded-address 10.2.10.252 10.2.10.253
+
+ip dhcp pool VLAN_IT
+network 10.2.10.0 255.255.255.0
+default-router 10.2.10.1 
+dns-server 9.9.9.9 
+domain-name cisco.local

@@ -1,0 +1,64 @@
+! peer 1 WAN is 203.0.113.1
+! peer 2 WAN is 203.0.113.5
+! tunnel network is 198.51.0.0/30
+!
+!       |198.51.0.1                                     198.51.0.2 |                        
+!       |-----------------------------------------------------------                        
+!       |                 GRE/IPSEC 198.51.0.0/30                  |                        
+!                                                                                           
+!                                                                                           
+! +------+  203.0.113.1/30        +------+  203.0.113.6/30        +------+                  
+! |      |  G1/0                  |      |  G2/0                  |      |                  
+! |  R1  --------------------------  R2  --------------------------  R3  |                  
+! |      |                  G1/0  |      |                  G1/0  |      |                  
+! +------+        203.0.113.2/30  +------+        203.0.113.5/30  +------+ 
+
+! 1 - set ISAKMP policy for phase 1
+crypto isakmp policy 10
+ encr aes 256
+ authentication pre-share
+ group 14
+ lifetime 3600
+ hash sha256
+exit
+
+! 2 set psk, use remote WAN ip
+crypto isakmp key 123456 address 203.0.113.5
+!! when using ipv6 make sure the subnet matches
+crypto isakmp key ciscocisco address ipv6 2001:db8:4:100::2/80
+
+! 3 set ipsec transform set, use tunnel for full encryption
+crypto ipsec transform-set IPSEC_TRANSFORM esp-aes 256 esp-sha-hmac
+ mode transport
+exit
+
+! 4 ipsec profile
+! you can set multiple transform sets that are used in order
+crypto ipsec profile IPSEC_PROFILE
+ set transform-set IPSEC_TRANSFORM
+exit
+
+interface Tunnel0
+ ! tweak gre tunnel
+ bandwidth 2000
+ ip mtu 1400
+ ip tcp adjust-mss 1360
+ !! sometimes cml borks so you need this
+ keepalive 10
+ ipv6 address FE80::2 link-local
+ ipv6 address 2001:DB8:200:1::2/64
+ !tunnel source 203.0.113.1
+ tunnel source GigabitEthernet0/1
+ tunnel destination 2001:db8:2:100::2
+ ! set ipsec
+ !! set tunnel mode gre ip for standard gre
+ !! set tunnel mode ipsec ipv6 for ospfv3
+ tunnel mode ipsec ipv6
+ tunnel protection ipsec profile IPSEC_PROFILE
+
+
+!? TSHOOT
+show crypto ipsec transform-set IPSEC_TRANSFORM
+show crypto map
+show crypto isakmp sa
+show crypto ipsec sa

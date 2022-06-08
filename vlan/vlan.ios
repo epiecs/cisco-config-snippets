@@ -1,0 +1,36 @@
+!! create vlans
+vlan 10
+name IT
+exit
+
+vlan 20
+name RND
+exit
+
+vlan 999
+name NAT
+exit
+
+!! vlan interfaces
+interface vlan 10
+ip address 10.2.10.253 255.255.255.0
+ipv6 address 2001:db8:2:10::253/64
+no shut
+
+interface vlan 20
+ip address 10.2.20.253 255.255.255.0
+ipv6 address 2001:db8:2:20::253/64
+no shut
+
+!! vlan trunks
+interface po1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport nonegotiate
+switchport trunk allowed vlan 10,20,999
+switchport trunk native vlan 999
+
+!! access port
+int g0/3
+switchport mode access
+switchport access vlan 20

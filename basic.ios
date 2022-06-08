@@ -1,0 +1,20 @@
+! base config
+enable
+configure terminal
+
+no ip domain-lookup
+
+ip routing
+ipv6 unicast-routing
+
+ip domain-name cisco.local
+username admin secret cisco
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+
+line vty 0 15
+login local
+transport input ssh
+exec-timeout 0 0
+logging synchronous
+exit

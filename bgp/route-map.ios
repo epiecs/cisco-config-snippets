@@ -1,0 +1,29 @@
+!! outbound route map
+ip prefix-list PREFERRED_IPV4_PATH seq 5 permit 192.168.3.0/24 le 27
+
+route-map USE_THIS_PATH_FOR_IPV4 permit 10
+match ip address prefix-list PERFERRED_IPV4_PATH
+set local-preference 250
+
+router bgp 65010
+address-family ipv4 unicast
+neighbor 198.51.100.2 route-map USE_THIS_PATH_FOR_IPV4 in
+exit
+address-family ipv6
+neighbor 2001:DB8:0:198::2 route-map USE_THIS_PATH_FOR_IPV4 in
+exit
+
+
+!! inbound route map with communities
+
+route-map INBOUND_INTERNET permit 10
+set community no-export additive
+set local-preference 250
+
+router bgp 65010
+address-family ipv4 unicast
+neighbor 198.51.100.2 route-map INBOUND_INTERNET in
+exit
+address-family ipv6
+neighbor 2001:DB8:0:198::2 route-map INBOUND_INTERNET in
+exit
