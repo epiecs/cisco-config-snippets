@@ -1,0 +1,45 @@
+enable
+configure terminal
+ipv6 unicast-routing
+
+router bgp 65001
+
+bgp router-id 1.1.1.1
+! neighbors
+neighbor 203.0.113.2 remote-as 65002
+neighbor 203.0.113.3 remote-as 65003
+neighbor 2001:db8:113::2 remote-as 65002
+neighbor 2001:db8:113::3 remote-as 65003
+
+! AFI / SAFI
+address-family ipv4 unicast
+neighbor 203.0.113.2 activate
+neighbor 203.0.113.3 activate
+network 192.168.0.0 mask 255.255.255.0
+exit
+
+address-family ipv6 unicast
+neighbor 2001:db8:113::2 activate
+neighbor 2001:db8:113::3 activate
+network 2001:db8:0:50::/64
+exit
+
+! summarize
+address-family ipv4 unicast
+! adds extra summary address
+aggregate-address 192.168.0.0 255.255.0.0
+! adds extra summary address
+! removes more specific prefixes
+! atomic aggregate is set, AS_PATH, MED and communities are lost
+aggregate-address 192.168.0.0 255.255.0.0 summary-only
+! adds extra summary address
+! removes more specific prefixes
+! keeps AS_PATH information
+aggregate-address 192.168.0.0 255.255.0.0 summary-only as-set
+
+! show
+show bgp all neighbors
+show bgp ipv4 unicast neighbors 203.0.113.2 advertised-routes
+show bgp ipv4 unicast summary
+show bgp ipv4 unicast summary
+show bgp ipv4 unicast 192.168.1.0 255.255.255.224

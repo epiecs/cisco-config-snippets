@@ -1,0 +1,26 @@
+interface loopback 10
+ip add 1.1.1.4 255.255.255.255
+
+! Static routes to neighours loopbacks
+ip route 10.1.0.1 255.255.255.255 g0/3 172.16.20.125
+ip route 10.1.1.1 255.255.255.255 g0/4 172.16.21.125
+
+
+router bgp 65001
+address-family ipv4
+
+router bgp 65001
+ neighbor 10.1.2.1 remote-as 65002
+ neighbor 10.1.2.1 ebgp-multihop 2
+ neighbor 10.1.2.1 update-source Loopback0
+
+ neighbor 10.1.3.1 remote-as 65003
+ neighbor 10.1.3.1 ebgp-multihop 2
+ neighbor 10.1.3.1 update-source Loopback0
+
+ address-family ipv4
+  network 172.16.1.0 mask 255.255.255.0
+
+  neighbor 10.1.2.1 activate
+  neighbor 10.1.3.1 activate
+ exit-address-family
