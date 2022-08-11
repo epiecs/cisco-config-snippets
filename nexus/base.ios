@@ -1,0 +1,30 @@
+configure terminal
+
+username admin password admin
+
+feature interface-vlan
+feature lacp
+feature vpc
+
+hostname SW-CORE-2
+
+no ip domain-lookup
+
+
+vlan 10
+name dc-west
+vlan 20
+name dc-east
+vlan 99
+name native-vlan
+exit
+
+interface vlan 10
+ip address 10.0.10.252/24
+no shut
+
+interface vlan 20
+ip address 10.0.20.252/24
+no shut
+
+do copy run start
