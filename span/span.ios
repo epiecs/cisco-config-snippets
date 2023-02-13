@@ -1,0 +1,49 @@
+enable
+configure terminal
+
+! #################################################
+! SPAN - same switch
+!
+
+! Standaard direction is both. you can filter rx and tx with source interface
+! Source can be interface or vlan
+monitor session 1 source interface G0/1
+monitor session 2 source vlan 1
+
+! Set destination interface
+monitor session 1 destination interface G0/1
+
+! Filter vlans on trunks used as source interface
+monitor session 1 filter vlan 1 - 100
+
+! Check
+do show monitor
+
+! #################################################
+! RSPAN - span vlan
+!
+
+! First create rspan vlan on all switches
+! Add the rspan vlan to all trunks where needed
+
+vlan 4000
+remote-span
+name rspan-vlan
+exit
+do show vlan remote-span
+
+! Configure source interface or vlan
+monitor session 1 source interface G0/1
+monitor session 2 source vlan 1
+
+! Set destination to rspan vlan
+monitor session 1 destination remote vlan 4000
+
+! Capture traffic on switch where you are connected
+monitor session 1 source remote vlan 4000
+
+! Set destination interface
+monitor session 1 destination interface G0/1
+
+! Check
+do show monitor

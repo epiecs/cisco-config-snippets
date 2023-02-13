@@ -1,0 +1,83 @@
+! check
+
+do show spanning-tree
+do show spanning-tree summary
+do show spanning-tree root
+show spanning-tree vlan 10
+
+
+! #################################################
+! Rapid PVST
+!
+
+enable
+configure terminal
+
+spanning-tree mode rapid-pvst
+
+! Set prio
+spanning-tree vlan 1-4094 priority 8192
+
+! Make primary root
+! Calculates the lowest needed priority
+spanning-tree vlan 1-4094 root primary
+
+! Does not calculate, always uses 28672
+spanning-tree vlan 1-4094 root secondary
+
+! Long path cost for interfaces faster than 10Gbit
+spanning-tree pathcost method long
+
+
+! #################################################
+! MSTP
+!
+
+enable
+configure terminal
+
+spanning-tree mode mst
+
+! Run on all switches
+spanning-tree mst configuration
+instance 1 vlan 10
+instance 2 vlan 20
+exit
+
+! Run on one switch to make it root bridge for instance 1
+spanning-tree mst 1 priority 8192
+spanning-tree mst 2 priority 16384
+
+! Run on the other switch to make it root bridge for instance 2
+spanning-tree mst 2 priority 8192
+spanning-tree mst 1 priority 16384
+
+! #################################################
+! Optimizations and security
+!
+
+! Portfast
+
+! specific interface
+interface gi0/1
+spanning-tree portfast
+
+! all access ports
+spanning-tree portfast default
+
+! BPDU Guard
+
+! specific interface
+interface gi0/1
+spanning-tree bpduguard enable
+
+! All portfast interfaces
+spanning-tree portfast bpduguard default
+
+
+! Root Guard
+
+! Run on switch that is root
+
+interface range gi0/1-3
+spanning-tree guard root

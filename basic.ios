@@ -12,9 +12,19 @@ username admin secret cisco
 crypto key generate rsa general-keys modulus 2048
 ip ssh version 2
 
+line console 0
+logging synchronous
+exit
+
 line vty 0 15
 login local
 transport input ssh
 exec-timeout 0 0
 logging synchronous
 exit
+
+
+! Management interface on switch
+interface vlan 1
+ip address 10.0.0.200 255.255.255.0
+no shutdown
