@@ -7,6 +7,9 @@ no ip domain-lookup
 ip routing
 ipv6 unicast-routing
 
+enable secret cisco
+service password-encryption
+
 ip domain-name cisco.local
 username admin secret cisco
 crypto key generate rsa general-keys modulus 2048
