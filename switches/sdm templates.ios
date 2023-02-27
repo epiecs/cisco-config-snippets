@@ -1,0 +1,16 @@
+! Example for 2960 https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst2960/software/release/12-2_53_se/configuration/guide/2960scg/swsdm.pdf
+
+enable
+configure terminal
+
+! show template
+do show sdm prefer
+
+! common templates
+! access              Access bias
+! default             Default bias
+! dual-ipv4-and-ipv6  Support both IPv4 and IPv6
+! routing             Unicast bias
+! vlan                VLAN bias
+
+sdm prefer <template>
