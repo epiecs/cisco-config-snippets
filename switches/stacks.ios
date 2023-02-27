@@ -1,0 +1,19 @@
+enable
+configure terminal
+
+
+! RENUMBER switch in stack
+! First check the current stack
+do show ip interface brief
+do show switch
+
+! in config mode renumber
+switch <current number> renumber 1
+
+reload
+
+
+! REMOVE stale switches from stack
+do show switch
+
+no switch <number to remove> provision>
