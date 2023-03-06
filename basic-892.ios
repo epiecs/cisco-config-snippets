@@ -6,6 +6,8 @@ no ip domain-lookup
 
 ip routing
 
+hostname R1
+
 enable secret cisco
 service password-encryption
 
@@ -29,12 +31,13 @@ exit
 ! Update route and interface where necessary
 ! 
 
-ip route 0.0.0.0 0.0.0.0 g0 192.168.224.254
+! ip route 0.0.0.0 0.0.0.0 g0 192.168.224.254
 
 ! GigabitEthernet network
 interface GigabitEthernet 0
 ip nat outside
-ip address 192.168.224.200 255.255.255.0
+! ip address 192.168.224.200 255.255.255.0
+ip address dhcp
 no shutdown
 
 ! FastEthernet8 network
