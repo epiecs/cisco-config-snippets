@@ -29,6 +29,8 @@ exit
 ! Update route and interface where necessary
 ! 
 
+ip route 0.0.0.0 0.0.0.0 g0 192.168.224.254
+
 ! GigabitEthernet network
 interface GigabitEthernet 0
 ip nat outside
