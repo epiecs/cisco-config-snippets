@@ -1,0 +1,69 @@
+! base config
+enable
+configure terminal
+
+no ip domain-lookup
+
+ip routing
+
+enable secret cisco
+service password-encryption
+
+ip domain-name cisco.local
+username admin secret cisco
+crypto key generate rsa general-keys modulus 1024
+ip ssh version 2
+
+line console 0
+logging synchronous
+exit
+
+line vty 0 15
+login local
+transport input ssh
+exec-timeout 0 0
+logging synchronous
+exit
+
+! 
+! Update route and interface where necessary
+! 
+
+! GigabitEthernet network
+interface GigabitEthernet 0
+ip nat outside
+ip address 192.168.224.200 255.255.255.0
+no shutdown
+
+! FastEthernet8 network
+interface FastEthernet 8
+ip nat inside
+ip address 172.16.0.1 255.255.255.0
+no shutdown
+
+! Vlan 1
+interface vlan 1
+ip nat inside
+ip address 10.0.1.1 255.255.255.0
+no shutdown
+
+interface range FastEthernet 0-7
+switchport mode access
+switchport access vlan 1
+no shutdown
+
+! Allow PAT for RFC 1918
+ip access-list standard LAN_ALLOW_PAT
+permit 192.168.0.0 0.0.255.255
+permit 172.16.0.0 0.0.31.255
+permit 10.0.0.0 0.255.255.255
+ip nat inside source list LAN_ALLOW_PAT interface g0 overload
+
+! DHCP for vlan 1
+ip dhcp excluded-address 10.0.1.1
+ip dhcp excluded-address 10.0.1.200 10.0.1.254
+ip dhcp pool VLAN_1
+network 10.0.1.0 255.255.255.0
+default-router 10.0.1.1 
+dns-server 9.9.9.9
+domain-name cisco.local
