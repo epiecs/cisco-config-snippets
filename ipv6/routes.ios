@@ -1,0 +1,8 @@
+enable
+configure terminal
+
+! Enable ipv6 routing + GUA/ULA via SLAAC
+! Layer 3 switches need the correct SDM template
+ipv6 unicast-routing
+
+ipv6 route 2001:db8:1::/64 GigabitEthernet 0/1 fe80::1

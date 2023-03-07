@@ -1,0 +1,52 @@
+enable
+configure terminal
+
+! Enable ipv6 routing + GUA/ULA via SLAAC
+! Layer 3 switches need the correct SDM template
+ipv6 unicast-routing
+
+! This example uses a remote DHCPv6 server
+
+! 
+! On the DHCPv6 server
+! 
+
+! If you do not use relay this is more than enough
+! Except if you use flags
+ipv6 dhcp pool CLIENTS
+address prefix 2001:db8:1::/64
+dns-server 2001:db8:10::8888
+domain-name lab.local
+
+interface g0/1
+ipv6 dhcp server CLIENTS
+! Stateless
+ipv6 nd other-config-flag
+! Statefull
+ipv6 nd managed-config-flag
+
+! 
+! On the relay server
+! 
+
+interface g0/0
+ipv6 dhcp relay destination 2001:db8:2::2
+
+! Stateless
+ipv6 nd other-config-flag
+! Statefull
+ipv6 nd managed-config-flag
+
+! 
+! On the client
+! 
+
+interface g0/0
+ip address dhcp
+
+! 
+! Show commands
+! 
+
+do show ipv6 dhcp interface
+do show ipv6 dhcp binding
