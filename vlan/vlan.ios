@@ -23,7 +23,7 @@ ipv6 address 2001:db8:2:20::253/64
 no shut
 
 !! vlan trunks
-interface po1
+interface G0/1
 switchport trunk encapsulation dot1q
 switchport mode trunk
 switchport nonegotiate
