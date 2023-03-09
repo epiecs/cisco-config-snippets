@@ -1,0 +1,4 @@
+show running-config | section line vty
+show ip interface brief | include up
+show ip interface brief | exclude unassigned
+show ip route | begin Gateway

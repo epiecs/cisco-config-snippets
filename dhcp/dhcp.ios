@@ -6,3 +6,19 @@ network 10.2.10.0 255.255.255.0
 default-router 10.2.10.1 
 dns-server 9.9.9.9 
 domain-name cisco.local
+
+
+! Dhcp relay
+interface GigabitEthernet 0/0
+ip helper-address 10.0.100.10 
+
+
+! Verify
+show running-config | section dhcp
+show ip dhcp binding
+! niet beschikbaar op elk apparaat
+show ip dhcp server statistics
+
+! disable/enable
+no service dhcp
+service dhcp

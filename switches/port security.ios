@@ -1,0 +1,19 @@
+enable
+configure terminal
+
+interface FastEthernet 0/1
+switchport port-security
+! max 2 mac adressen leren
+switchport port-security maximum 4
+! aa:aa:bb:bb:cc:cc vast instellen als 1 van de 4 adressen
+switchport port-security mac-address aaaa.bbbb.cccc
+! geleerde mac adressen toevoegen aan de running-config
+switchport port-security mac-address sticky
+! Violation mode kiezen shutdown/restrict/protect
+switchport port-security violation restrict
+
+
+! Verify commands
+show port-security
+show port-security interface FastEthernet 0/1
+show port-security address

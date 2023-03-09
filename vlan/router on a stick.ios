@@ -1,0 +1,21 @@
+enable
+configure terminal
+
+interface gigabitEthernet 0/1
+description trunk
+no shutdown
+
+interface gigabitEthernet 0/1.10
+description vlan10
+encapsulation dot1Q 10
+ip address 10.0.10.1 255.255.255.0
+
+interface gigabitEthernet 0/1.20
+description vlan20
+encapsulation dot1Q 20
+ip address 10.0.20.1 255.255.255.0
+
+interface gigabitEthernet 0/1.99
+description vlanmanagement
+encapsulation dot1Q 99
+ip address 10.0.99.1 255.255.255.0

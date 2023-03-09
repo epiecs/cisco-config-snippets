@@ -1,0 +1,11 @@
+enable
+
+show interfaces
+show startup-config
+show running-config
+show flash
+show version
+show history
+show ip interface
+show ipv6 interface
+show mac-address-table
