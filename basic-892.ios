@@ -49,7 +49,7 @@ no shutdown
 ! Vlan 1
 interface vlan 1
 ip nat inside
-ip address 10.0.1.1 255.255.255.0
+ip address 192.168.122.1 255.255.255.0
 no shutdown
 
 interface range FastEthernet 0-7
@@ -65,10 +65,10 @@ permit 10.0.0.0 0.255.255.255
 ip nat inside source list LAN_ALLOW_PAT interface g0 overload
 
 ! DHCP for vlan 1
-ip dhcp excluded-address 10.0.1.1
-ip dhcp excluded-address 10.0.1.200 10.0.1.254
+ip dhcp excluded-address 192.168.122.1
+ip dhcp excluded-address 192.168.122.200 192.168.122.254
 ip dhcp pool VLAN_1
-network 10.0.1.0 255.255.255.0
-default-router 10.0.1.1 
+network 192.168.122.0 255.255.255.0
+default-router 192.168.122.1 
 dns-server 9.9.9.9
 domain-name cisco.local
