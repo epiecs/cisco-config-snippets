@@ -1,0 +1,32 @@
+enable
+configure terminal
+
+interface FastEthernet 0/1
+switchport port-security
+! learn max 2 mac addresses
+switchport port-security maximum 4
+! config address aa:aa:bb:bb:cc:cc as 1 of 4 addresses
+switchport port-security mac-address aaaa.bbbb.cccc
+! add learned addresses to the running config
+switchport port-security mac-address sticky
+
+! choose violation mode shutdown/restrict/protect
+! | Violation Mode | Discards Traffic | Sends Syslog  Message | Increase Violation  Counter | Shuts Down  Port |
+! |:--------------:|:----------------:|:---------------------:|:---------------------------:|:----------------:|
+! |     Protect    |        Yes       |           No          |              No             |        No        |
+! |    Restrict    |        Yes       |          Yes          |             Yes             |        No        |
+! |    Shutdown    |        Yes       |          Yes          |             Yes             |        Yes       |
+switchport port-security violation restrict
+
+! set aging strategy, time is expressed in _minutes_
+! allow aging for statically set mac addresses
+switchport port-security aging static
+! age after 10 minutes
+switchport port-security aging time 10
+! choose type, absolute or inactivity
+switchport port-security aging type {absolute | inactivity
+
+! Verify commands
+show port-security
+show port-security interface FastEthernet 0/1
+show port-security address

@@ -1,0 +1,27 @@
+enable
+configure terminal
+
+
+! The switch maintains a table of ip and mac bindings
+! https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst3750/software/release/12-2_35_se/configuration/guide/scg/swdhcp82.html#wp1070843
+
+! First enable dhcp snooping. Always specify the vlans where dhcp snooping 
+! is needed. If you do not specify the vlans then snooping is enabled for 
+! all vlans
+ip dhcp snooping
+ip dhcp snooping vlan 10
+
+! Trust all ports between network devices and ports going to dhcp servers. Ports 
+! going to devices with static ips should also be trusted (or handled with a l2 acl)
+interface gigabitEthernet 0/1
+ip dhcp snooping trust
+
+! Additional security can be implemented such as rate limiting
+! Rate limit is max requests per second
+interface range FastEthernet 0/1-24
+ip dhcp snooping limit rate 5
+
+
+! Verify commands
+show ip dhcp snooping
+show ip dhcp snooping binding

@@ -1,0 +1,51 @@
+enable
+configure terminal
+
+
+! Dynamic Arp Inspection requires DHCP snooping
+
+! First enable dhcp snooping. Always specify the vlans where dhcp snooping 
+! is needed. If you do not specify the vlans then snooping is enabled for 
+! all vlans
+ip dhcp snooping
+ip dhcp snooping vlan 10
+
+! Enable DAI for vlan 10. This checks if the mac address / ip combination in the 
+! arp packet is valid
+ip arp inspection vlan 10
+
+! https://www.practicalnetworking.net/wp-content/uploads/2017/01/traditional-arp-request-arp.png
+! There are extra checks that can be done. Within the _arp body_ are fields such as 
+! - sender mac
+! - sender ip
+! - destination mac
+! - destination ip
+
+! DAI will then check the layer 2 ethernet fields against the arp body
+! DAI can then check these against the L2 ethernet header. For example, if the source 
+! ethernet mac differs from the sender mac in the arp body then the arp request can be 
+! dropped. 
+
+! https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst3750x_3560x/software/release/12-2_55_se/configuration/guide/3750xscg/swdynarp.html#20307
+! Checks: 
+! - validate -> checks for invalid ip addresses in the arp body (such as broadcast, mcast)
+! - src-mac -> is the source mac and sender mac in the arp body the same
+! - dst-mac -> is the destination mac and destination mac in the arp body the same
+
+! The destination mac is a check for arp replies, since we dont have a mac on a request
+
+! This command checks all three
+ip arp inspection validate src-mac dst-mac ip
+
+
+! Trust all ports between network devices and ports going to dhcp servers. Ports 
+! going to devices with static ips should also be trusted (or handled with a l2 acl)
+interface gigabitEthernet 0/1
+ip dhcp snooping trust
+ip arp inspection trust
+
+! Verify commands
+show ip arp inspection vlan 10
+show ip arp inspection statistics 10
+show ip arp inspection interfaces gigabitEthernet 0/1
+clear ip arp inspection statistics
