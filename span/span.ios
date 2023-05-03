@@ -5,15 +5,20 @@ configure terminal
 ! SPAN - same switch
 !
 
-! Standaard direction is both. you can filter rx and tx with source interface
-! Source can be interface or vlan
+! Standard direction is both. you can filter rx and tx with source interface
+
+! monitor interface, you can also monitor only rx or tx. default is both.
 monitor session 1 source interface G0/1
+monitor session 1 source interface G0/1 rx
+monitor session 1 source interface G0/1 tx
+
+! monitor vlan
 monitor session 2 source vlan 1
 
 ! Set destination interface
 monitor session 1 destination interface G0/1
 
-! Filter vlans on trunks used as source interface
+! Filter vlans if a trunk is used as source interface
 monitor session 1 filter vlan 1 - 100
 
 ! Check
