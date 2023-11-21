@@ -35,3 +35,4 @@ standby timers msec 100 msec 300
 
 ! verification commands
 show standby
+show standby brief
