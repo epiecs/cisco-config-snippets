@@ -27,11 +27,23 @@ standby 610 priority 150
 ! secondary ip
 standby 10 ip 10.20.10.254 secondary
 
+! authentication
+standby 10 authentication <password>
+
 ! set hello and hold timers seconds and msec
 ! hello is to check if the other router is still alive (default 3s)
 ! hold timer is how long to wait before a router takes over (default 10s)
 standby timers 5 15
 standby timers msec 100 msec 300
+
+! object tracking - check ip sla for more in depth options
+! first configure track object
+track 20 interface g0/1 line-protocol
+! apply tracking object
+! if the line protocol on g0/1 goes down decrement 60 from the hsrp priority
+interface vlan 10
+standby 10 track 20 decrement 60
+
 
 ! verification commands
 show standby

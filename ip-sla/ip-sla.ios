@@ -1,0 +1,62 @@
+! There are 2 components: track and sla
+! track is something the router tracks
+! sla is a description of something to track
+
+
+! TRACK - simple tracking
+! Simple tracking if an interface is up
+track 10 interface g0/1 line-protocol
+
+! EXAMPLE hsrp example where tracking is used to decrement priority
+int vlan 1
+standby 1 track 10 decrement 60
+
+! verification commands
+show track
+show track brief
+show track 10 
+
+! 
+! IP SLA
+! 
+
+! For ip sla you need 3 steps. 
+! 1 - First create an sla (what to check)
+! 2 - Schedule a sla (when to check)
+! 3 - Use the track command to use an sla (optional if you just want statistics)
+
+! 1 - Create SLA
+! sla's can check from ip reachability to http responses etc...
+! we are creating a simple sla to check ip reachability
+! ping 9.9.9.9 every 5 seconds
+! send 5 (default) packets every 5 seconds. 
+!   If 1 packet is slower then 200ms -> sla fails
+!   If the total time of 5 packets > 500ms -> sla fails
+ip sla 1
+icmp-echo 9.9.9.9
+frequency 5
+threshold 200
+timeout 500
+
+! 2 - SCHEDULE
+! default lifetime is 1 hour
+! run sla 1 forever and start it now 
+ip sla schedule 1 life forever start-time now
+! run sla 1 forever and run it every day at 10:00
+ip sla schedule 1 life forever start-time 10:00 recurring
+
+! 3 - TRACK
+! Use tracking object to track the state of ip sla 1 (return code)
+track 20 ip sla 1 state
+
+! EXAMPLE hsrp example where tracking + sla is used to decrement priority
+int vlan 1
+standby 1 track 20 decrement 60
+
+! verification commands
+show ip sla summary
+show ip sla statistics
+show ip sla statistics 1
+
+show track ip sla
+show track ip sla brief
