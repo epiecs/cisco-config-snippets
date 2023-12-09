@@ -34,3 +34,8 @@ switchport trunk native vlan 999
 int g0/3
 switchport mode access
 switchport access vlan 20
+
+! Verify
+show vlan
+show vlan brief
+show interfaces trunk

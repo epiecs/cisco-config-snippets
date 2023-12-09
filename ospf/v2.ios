@@ -7,7 +7,6 @@ router ospf 1
 router-id 1.1.0.1
 auto-cost reference-bandwidth 100000
 passive-interface default
-default-information originate
 
 no passive-interface GigabitEthernet 0/0
 no passive-interface GigabitEthernet 0/1
@@ -16,8 +15,10 @@ no passive-interface GigabitEthernet 0/1
 network 10.0.0.0 0.0.0.15 area 0
 network 172.16.1.0 0.0.0.1 area 0
 
-! Default route
+! Use static default route and redistribute
 ip route 0.0.0.0 0.0.0.0 g0/3 192.168.122.1
+default-information originate
+network 192.168.122.0 0.0.0.255 area 0
 
 interface g0/0
 ip address 10.0.0.0 255.255.255.254
@@ -33,16 +34,16 @@ ip ospf <process id> area 0
 no shutdown
 exit
 
+! A loopback with point-to-point is redistributed
+! with the entire subnetmask instead of /32
 interface loopback 0
 ip address 172.16.1.1 255.255.255.0
 ip ospf network point-to-point
 exit
 
-
-
 do wr mem
 
-!? TSHOOT
+! Verify Commands
 show ip interface brief
 show ip route
 show ip protocols | include Router ID

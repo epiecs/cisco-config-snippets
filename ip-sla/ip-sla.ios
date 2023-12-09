@@ -34,6 +34,7 @@ show track 10
 !   If the total time of 5 packets > 500ms -> sla fails
 ip sla 1
 icmp-echo 9.9.9.9
+! icmp-echo 9.9.9.9 source-ip 192.168.122.100
 frequency 5
 threshold 200
 timeout 500
