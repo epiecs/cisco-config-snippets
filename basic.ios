@@ -2,6 +2,19 @@
 enable
 configure terminal
 
+hostname SW-LAB
+
+! Management interface on switch
+interface vlan 1
+ip address 10.0.0.200 255.255.255.0
+no shutdown
+
+banner motd ^C
+--------------------------
+- Authorized access only -
+--------------------------
+^C
+
 no ip domain-lookup
 
 ip routing
@@ -17,17 +30,12 @@ ip ssh version 2
 
 line console 0
 logging synchronous
+login local
 exit
 
 line vty 0 15
+logging synchronous
 login local
 transport input ssh
 exec-timeout 0 0
-logging synchronous
 exit
-
-
-! Management interface on switch
-interface vlan 1
-ip address 10.0.0.200 255.255.255.0
-no shutdown
