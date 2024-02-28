@@ -1,0 +1,28 @@
+interface range g0/0-1
+! active/passive for lacp
+! auto/desirable for pagp
+! on for etherchannel
+channel-group 1 mode active
+
+! lacp tweaking
+! only works if interface is configured as lacp with active/passive
+interface port-channel 1
+! minimum 2 interfaces to work
+lacp min-bundle 2
+! use max 3 interfaces of bundle
+lacp max-bundle 3
+
+! Load balancing
+! Set globally in config mode
+port-channel load-balance <algorithm>
+do show etherchannel load-balance
+
+! verification commands global
+show etherchannel summary
+show interfaces port-channel 1
+
+! verification commands lacp specific
+show lacp 1 neighbor
+show lacp counters
+show lacp neighbor
+debug lacp all
