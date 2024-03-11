@@ -63,17 +63,16 @@ interface gi0/1
 spanning-tree portfast
 
 ! all access ports
-spanning-tree portfast default
+spanning-tree portfast edge default
 
 ! BPDU Guard
 
 ! specific interface
-interface gi0/1
+interface GigabitEthernet i0/1
 spanning-tree bpduguard enable
 
 ! All portfast interfaces
-spanning-tree portfast bpduguard default
-
+spanning-tree portfast edge bpduguard default
 
 ! Root Guard
 
