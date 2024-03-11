@@ -1,0 +1,13 @@
+enable
+configure terminal
+
+no ip domain-lookup
+
+line console 0
+logging synchronous
+exit
+
+line vty 0 15
+! exec-timeout 0 0
+logging synchronous
+exit
