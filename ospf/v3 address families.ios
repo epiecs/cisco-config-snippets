@@ -1,19 +1,53 @@
+! Needed for ospfv3
+ipv6 unicast-routing
+
 router ospfv3 1
 router-id 1.1.2.3
+auto-cost reference-bandwidth 100000
+
 address-family ipv4 unicast
-!  default-information originate always
-!  area 2 range 10.2.0.0 255.255.0.0
+! Propagate gateway
+ default-information originate always
+! Summarization
+ area 2 range 10.2.0.0 255.255.0.0
 exit
 address-family ipv6 unicast
-!  default-information originate always
-!  area 2 range 2001:DB8:2::/48
+ default-information originate always
+ area 2 range 2001:DB8:2::/48
 exit
 
+! Interface configuration with cost and network type
 interface g0/1
  ospfv3 1 ipv4 area 0
  ospfv3 1 ipv6 area 0
  ospfv3 1 network point-to-point
+ ospfv3 1 cost 200
 
+! Sub Areas
+router ospfv3 1
+! Stubby
+area 1 stub
+! Totally stubby
+area 1 stub no-summary
+! NSSA
+area 1 nssa
+! NSSA, on the router which should send the default gateway in the area
+area 1 nssa default-information-originate
+! Totally NSSA
+area 1 nssa no-summary
+
+! Verify commands
+show ip route
+show ip interface brief
+show ip ospf rib
+show ip ospf neighbor
+show ip ospf database
+show ip protocols
+
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! Nexus Switches
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 !! nexus only supports ipv6 with AF
 !! you need to enable normal ospf 
@@ -29,8 +63,8 @@ exit
 
 feature ospf
 router ospf 1
-router-id 1.1.1.1
-default-information originate always
+ router-id 1.1.1.1
+ default-information originate always
 exit
 interface e1/1
 ip router ospf 1 area 2

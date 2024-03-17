@@ -59,5 +59,6 @@ show ip sla summary
 show ip sla statistics
 show ip sla statistics 1
 
+show ip sla configuration
 show track ip sla
 show track ip sla brief
