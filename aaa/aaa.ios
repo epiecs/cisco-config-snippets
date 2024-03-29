@@ -1,0 +1,206 @@
+! https://www.reddit.com/r/networking/comments/qdnfvo/configure_both_local_and_tacacs_authentication_on/hhub4k4/
+
+enable
+configure terminal
+
+! Create a new user. This will be used as the fallback user
+! should tacacs fail
+username admin privilege 15 secret cisco
+
+! Enable aaa on your device
+aaa new-model
+
+! You have to pre approve all devices on your tacacs server
+! The problem is that your device might use a different ip 
+! depending on your network/setup.
+! 
+! We create a loopback interface for this example, but this 
+! is not required. The best way is to use the interface that 
+! houses your management ip in the next step.
+interface Loopback0
+ip address 10.0.0.10 255.255.255.0
+
+! Define the tacacs server group
+aaa group server tacacs+ TACACS_SERVERS
+  server-private 1.1.1.1 key 7 <tacacs psk>
+  server-private 1.1.1.2 key 7 <tacacs psk>
+  ip tacacs source-interface Loopback0
+
+! Test your tacacs server
+do test aaa group TACACS_SERVERS <user> <passwd> new-code
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! High level setup
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+! First we define Authentication, Authorization and Accounting methods. 
+! We then apply these to the correct ports. 
+
+! A special concern should be given to the `default` keyword. When used 
+! this will apply the current methods to ALL ports regardless of config. 
+
+! For Accounting we will make use of the `default` keyword. This config 
+! is shared for all ports.
+
+! For Authentication and Authorization we will not use the `default` 
+! keyword in order to define the authentication/authorization needed per 
+! port. 
+
+! We want to end up with a setup where console access makes use of just 
+! the local database. All access via ssh has proper authentication and 
+! authorization. This config hopes that you have your physical security 
+! in order. 
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! Authentication methods and config
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+! Create the authentication methods group for ssh and for console
+
+! Authentication methods are run in order. If a method is unavailable 
+! the switch/router will fall back to the next method. Do remember that 
+! a device will only fall back to the next method if the previous method 
+! is UNAVAILABLE. A failed login does not mean unavailable...
+
+! For TACACS_AND_LOCAL we first try tacacs and if this fails we use the local user database
+! For the LOCAL_ONLY we will use only the local database. We will apply this to the 
+! console port You can always add tacacs to your console authentication as well.
+! 
+! These commands only define auth groups; we will apply them later.
+aaa authentication login TACACS_AND_LOCAL group TACACS_SERVERS local
+aaa authentication login LOCAL_ONLY local
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! Authorization methods and config
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+! `exec` means privileged exec (aka enable mode). This commands lets your device 
+! use the tacacs servers - with fallback to the local database - to authenticate 
+! users for enable mode
+! 
+! if-authenticated is needed for when you fall back to the local user database.
+! Basically this says that the user is authorized if properly authenticated. If 
+! you do not use this command a user won't be able to run any command when authenticated 
+! via the local user database.
+! 
+! `aaa authorization config-commands` allows you to specify specific commands per 
+! user group on your tacacs server
+aaa authorization exec SSH group TACACS_SERVERS local if-authenticated
+aaa authorization commands 0 SSH group TACACS_SERVERS local if-authenticated
+aaa authorization commands 1 SSH group TACACS_SERVERS local if-authenticated
+aaa authorization commands 15 SSH group TACACS_SERVERS local if-authenticated
+aaa authorization config-commands
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! Accounting methods and config
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+! Do note the use of the `default` keyword. This means that accounting is by 
+! default applied to all ports
+! 
+! start means that a log entry is created when a command is started. You can 
+! also just use stop or start-stop (for when a command starts and ends)
+! 
+! We log all access to enable mode, and all commands run at privilege level 
+! 0,1 and 15. If needed you can add more privilege levels according to your 
+! own setup
+aaa accounting exec default start group TACACS_SERVERS
+aaa accounting commands 0 default start group TACACS_SERVERS
+aaa accounting commands 1 default start group TACACS_SERVERS
+aaa accounting commands 15 default start group TACACS_SERVERS
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! Applying the config to the needed ports
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+! If you always use the default group you need to use the following command
+! for console authorization to work
+! aaa authorization console
+
+! Apply the console auth group to the console. In our case this is the local 
+! user database
+line console 0
+  login authentication LOCAL_ONLY
+
+! Set the protocol to ssh, and use the SSH authorization group and SSH
+! authentication group methods. Use the SSH group for access to enable mode
+line vty 0 15
+  transport input ssh
+  login authentication TACACS_AND_LOCAL
+  authorization exec SSH
+
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! Example config using default
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+enable
+configure terminal
+reload in 10 Implementing AAA
+
+interface Loopback0
+ip address 10.0.0.10 255.255.255.0
+
+aaa group server tacacs+ TACACS_SERVERS
+  server-private 1.1.1.1 key 7 <tacacs psk>
+  server-private 1.1.1.2 key 7 <tacacs psk>
+  ip tacacs source-interface Loopback0
+
+username admin privilege 15 secret cisco
+
+aaa new-model
+
+aaa authentication login default group TACACS_SERVERS local
+aaa authorization exec default group TACACS_SERVERS local if-authenticated
+aaa accounting exec default start group TACACS_SERVERS
+aaa accounting commands 0 default start group TACACS_SERVERS
+aaa accounting commands 1 default start group TACACS_SERVERS
+aaa accounting commands 15 default start group TACACS_SERVERS
+
+aaa authorization console
+
+do reload cancel
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! Example config using groups
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+enable
+configure terminal
+reload in 10 Implementing AAA
+
+interface Loopback0
+ip address 10.0.0.10 255.255.255.0
+
+aaa group server tacacs+ TACACS_SERVERS
+  server-private 1.1.1.1 key 7 <tacacs psk>
+  server-private 1.1.1.2 key 7 <tacacs psk>
+  ip tacacs source-interface Loopback0
+
+username admin privilege 15 secret cisco
+
+aaa new-model
+
+aaa authentication login TACACS_AND_LOCAL group TACACS_SERVERS local
+aaa authentication login LOCAL_ONLY local
+
+aaa authorization exec SSH group TACACS_SERVERS local if-authenticated
+aaa authorization commands 0 SSH group TACACS_SERVERS local if-authenticated
+aaa authorization commands 1 SSH group TACACS_SERVERS local if-authenticated
+aaa authorization commands 15 SSH group TACACS_SERVERS local if-authenticated
+aaa authorization config-commands
+
+aaa accounting exec default start group TACACS_SERVERS
+aaa accounting commands 0 default start group TACACS_SERVERS
+aaa accounting commands 1 default start group TACACS_SERVERS
+aaa accounting commands 15 default start group TACACS_SERVERS
+
+line console 0
+  login authentication LOCAL_ONLY
+
+line vty 0 15
+  transport input ssh
+  login authentication TACACS_AND_LOCAL
+  authorization exec SSH
+
+do reload cancel
