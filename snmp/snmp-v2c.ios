@@ -1,0 +1,22 @@
+! Don't forget to set the global config!
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! SNMP v2c
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+enable
+configure terminal
+! Setup snmp community string for ro (READ ONLY) or rw (READ WRITE) access. This is used by the server 
+! to contact the device
+snmp-server community COMSTRING_READ ro
+snmp-server community COMSTRING_READWRITE rw
+
+! TRAPS config
+! Enables all traps and use Loopback0 as source
+snmp-server enable traps
+snmp-server trap-source Loopback 0
+! Enables only traps related to bgp
+snmp-server enable traps bgp
+
+! Send traps to server. The SERVER_COMSTRING is set on the server and used by the device to contact
+! the server.
+snmp-server host 10.30.0.10 traps SERVER_COMSTRING

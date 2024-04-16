@@ -1,0 +1,13 @@
+! snmp v2c or v3 are recommended, with v3 being the best option
+! https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/snmp/command/nm-snmp-cr-book/nm-snmp-cr-s5.html
+
+! v2c works with psk (community string)
+! v3 supports user/pass authentication with optional authenticity checks and encryption
+
+! Basic settings id/location/contact
+! you can copy the latitude from google maps when right clicking a location
+enable
+configure terminal
+snmp-server chassis-id MY_UNIQUE_ID
+snmp-server contact Gregory Bers <gregory@email.be>
+snmp-server location Rack, Room, Building, City, Country [LAT_X,LAT_Y]

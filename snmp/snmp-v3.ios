@@ -1,0 +1,30 @@
+! Don't forget to set the global config!
+
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! SNMP v3
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+! There are 3 security levels:
+! - noauth : username and password, no authenticity check, no payload encryption (cleartext)
+! - auth   : username and password, authenticity check with hash, no payload encryption (cleartext)
+! - priv   : username and password, authenticity check with hash, no payload encryption
+
+enable
+configure terminal
+
+! Setup snmp user with authenticity password and encryption key. This is used by the server 
+! to contact the device
+! Authenticity: sha algorithm with password
+! Encryption aes 256 with key
+! When using `noauth` You still need to declare an auth algorithm
+snmp-server group SNMP_AUTH_GROUP v3 priv
+snmp-server user USERNAME SNMP_AUTH_GROUP v3 auth sha PASSWORD priv aes 256 ENCRYPT_KEY
+
+! TRAPS config (see more above with the v2c config)
+! Enables all traps and use Loopback0 as source
+! We re-use the existing SNMP_AUTH_GROUP but this is not required
+snmp-server enable traps
+snmp-server trap-source Loopback 0
+! Define server for traps. The SERVER_USERNAME is set on the server
+snmp-server host 10.30.0.10 traps version 3 priv SERVER_USERNAME
+snmp-server user SERVER_USERNAME SNMP_AUTH_GROUP v3 auth sha SERVER_PASSWORD priv aes 256 SERVER_ENCRYPT_KEY

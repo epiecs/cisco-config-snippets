@@ -1,0 +1,10 @@
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! SNMP Verification commands
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+do show snmp
+! Gets the engine ID needed for trap config
+do show snmp user
+do show snmp group
+do show snmp chassis
+do show snmp location
+do show snmp contact
