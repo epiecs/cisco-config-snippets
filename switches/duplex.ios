@@ -1,0 +1,4 @@
+! If you get duplex mismatch issues
+interface g0/1
+no negotiation auto
+duplex full
