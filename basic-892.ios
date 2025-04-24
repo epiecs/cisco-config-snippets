@@ -60,7 +60,7 @@ no shutdown
 ! Allow PAT for RFC 1918
 ip access-list standard LAN_ALLOW_PAT
 permit 192.168.0.0 0.0.255.255
-permit 172.16.0.0 0.0.31.255
+permit 172.16.0.0 0.31.255.255
 permit 10.0.0.0 0.255.255.255
 ip nat inside source list LAN_ALLOW_PAT interface g0 overload
 
