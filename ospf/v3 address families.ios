@@ -36,6 +36,9 @@ area 1 nssa default-information-originate
 ! Totally NSSA
 area 1 nssa no-summary
 
+! Totally NSSA, but let the ABR send out a default gateway
+area 1 nssa default-information-originate no-summary
+
 ! Verify commands
 show ip route
 show ip interface brief
